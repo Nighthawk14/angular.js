@@ -37,12 +37,14 @@ function createHttpBackend($browser, XHR, XDR, $browserDefer, callbacks, rawDocu
     url = url || $browser.url();
 
     if (lowercase(method) == 'jsonp') {
-      var callbackId = '_' + (callbacks.counter++).toString(36);
+      var callbackId = url.indexOf('JSON_SINGLE_CALLBACK') === -1 ? '_' + (callbacks.counter++).toString(36) : 'unique';
+
+
       callbacks[callbackId] = function(data) {
         callbacks[callbackId].data = data;
       };
 
-      jsonpReq(url.replace('JSON_CALLBACK', 'angular.callbacks.' + callbackId),
+      jsonpReq(url.replace('JSON_CALLBACK', 'angular.callbacks.' + callbackId).replace('JSON_SINGLE_CALLBACK', 'angular.callbacks.unique'),
           function() {
             if (callbacks[callbackId].data) {
               completeRequest(callback, 200, callbacks[callbackId].data);
